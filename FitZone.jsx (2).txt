@@ -1,0 +1,506 @@
+import { useState, useEffect } from "react";
+
+const USERS = [
+  { username: "member", password: "fitzone123", name: "Alex Johnson", plan: "Monthly", joined: "Jan 2025" },
+  { username: "admin", password: "admin2026", name: "Admin User", plan: "Staff", joined: "Jan 2024" },
+];
+
+const WORKOUTS = {
+  Monday: {
+    label: "CHEST & TRICEPS",
+    color: "#FF4D4D",
+    icon: "💪",
+    exercises: [
+      { name: "Barbell Bench Press", sets: "4 × 10", rest: "90s", videoId: "rT7DgCr-3pg", muscle: "Chest" },
+      { name: "Incline Dumbbell Press", sets: "3 × 12", rest: "75s", videoId: "DbFgADa2PL8", muscle: "Upper Chest" },
+      { name: "Cable Flyes", sets: "3 × 15", rest: "60s", videoId: "Iwe6AmxVf7o", muscle: "Chest" },
+      { name: "Tricep Pushdowns", sets: "4 × 12", rest: "60s", videoId: "vB5OHsJ3EME", muscle: "Triceps" },
+      { name: "Overhead Tricep Extension", sets: "3 × 12", rest: "60s", videoId: "YbX7Wd8jQ-U", muscle: "Triceps" },
+    ],
+  },
+  Tuesday: {
+    label: "BACK & BICEPS",
+    color: "#4D79FF",
+    icon: "🏋️",
+    exercises: [
+      { name: "Deadlift", sets: "4 × 6", rest: "120s", videoId: "op9kVnSso6Q", muscle: "Full Back" },
+      { name: "Pull-Ups", sets: "4 × 8", rest: "90s", videoId: "eGo4IYlbE5g", muscle: "Lats" },
+      { name: "Barbell Row", sets: "3 × 10", rest: "90s", videoId: "kBWAon7ItDw", muscle: "Mid Back" },
+      { name: "Hammer Curls", sets: "3 × 12", rest: "60s", videoId: "zC3nLlEvin4", muscle: "Biceps" },
+      { name: "Concentration Curls", sets: "3 × 12", rest: "60s", videoId: "Jvj2wV0vOYU", muscle: "Biceps" },
+    ],
+  },
+  Wednesday: {
+    label: "LEGS DAY",
+    color: "#FF8C00",
+    icon: "🦵",
+    exercises: [
+      { name: "Barbell Squat", sets: "5 × 8", rest: "120s", videoId: "Dy28eq2PjcM", muscle: "Quads" },
+      { name: "Romanian Deadlift", sets: "4 × 10", rest: "90s", videoId: "7j-2d5UsKls", muscle: "Hamstrings" },
+      { name: "Leg Press", sets: "4 × 12", rest: "90s", videoId: "IZxyjW7MPJQ", muscle: "Quads" },
+      { name: "Calf Raises", sets: "4 × 20", rest: "60s", videoId: "2NHBPUMGzq8", muscle: "Calves" },
+      { name: "Lunges", sets: "3 × 12", rest: "60s", videoId: "D7KaRcUTQeE", muscle: "Glutes" },
+    ],
+  },
+  Thursday: {
+    label: "SHOULDERS & ABS",
+    color: "#9B59B6",
+    icon: "🔥",
+    exercises: [
+      { name: "Overhead Press", sets: "4 × 10", rest: "90s", videoId: "2yjwXTZQDDI", muscle: "Shoulders" },
+      { name: "Lateral Raises", sets: "4 × 15", rest: "60s", videoId: "3VcKaXpzqRo", muscle: "Side Delts" },
+      { name: "Face Pulls", sets: "3 × 15", rest: "60s", videoId: "HSoHeSjFMlk", muscle: "Rear Delts" },
+      { name: "Plank", sets: "3 × 60s", rest: "45s", videoId: "ASdvN_XEl_c", muscle: "Core" },
+      { name: "Cable Crunches", sets: "4 × 15", rest: "45s", videoId: "dFzUjzfih7k", muscle: "Abs" },
+    ],
+  },
+  Friday: {
+    label: "FULL BODY POWER",
+    color: "#00B894",
+    icon: "⚡",
+    exercises: [
+      { name: "Power Clean", sets: "5 × 5", rest: "120s", videoId: "GJFjBPFjFno", muscle: "Full Body" },
+      { name: "Dips", sets: "4 × 10", rest: "75s", videoId: "2z8JmcrW-As", muscle: "Chest/Triceps" },
+      { name: "Chin-Ups", sets: "4 × 8", rest: "75s", videoId: "3YvfRx31xDE", muscle: "Back/Biceps" },
+      { name: "Dumbbell Shoulder Press", sets: "3 × 12", rest: "60s", videoId: "qEwKCR5JCog", muscle: "Shoulders" },
+      { name: "Russian Twists", sets: "3 × 20", rest: "45s", videoId: "wkD8rjkodUI", muscle: "Core" },
+    ],
+  },
+  Saturday: {
+    label: "CARDIO & CORE",
+    color: "#FD79A8",
+    icon: "🏃",
+    exercises: [
+      { name: "Treadmill HIIT", sets: "20 min", rest: "—", videoId: "auoJEqMXFsw", muscle: "Cardio" },
+      { name: "Battle Ropes", sets: "5 × 30s", rest: "30s", videoId: "eBerFDBFHRg", muscle: "Cardio/Arms" },
+      { name: "Box Jumps", sets: "4 × 10", rest: "60s", videoId: "52r_Ul5k03g", muscle: "Legs/Cardio" },
+      { name: "Hanging Leg Raises", sets: "4 × 12", rest: "45s", videoId: "hdng3Cz05GI", muscle: "Abs" },
+      { name: "Mountain Climbers", sets: "4 × 30s", rest: "30s", videoId: "nmwgirgXLYM", muscle: "Core" },
+    ],
+  },
+  Sunday: {
+    label: "ACTIVE RECOVERY",
+    color: "#74B9FF",
+    icon: "🧘",
+    exercises: [
+      { name: "Full Body Stretching", sets: "10 min", rest: "—", videoId: "sTANio_2E0Q", muscle: "Flexibility" },
+      { name: "Foam Rolling", sets: "10 min", rest: "—", videoId: "aOm5cLBVDxM", muscle: "Recovery" },
+      { name: "Light Yoga Flow", sets: "20 min", rest: "—", videoId: "v7AYKMP6rOE", muscle: "Full Body" },
+      { name: "Walking", sets: "30 min", rest: "—", videoId: "H3qlMBJBWyI", muscle: "Cardio" },
+    ],
+  },
+};
+
+const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+export default function FitZoneApp() {
+  const [screen, setScreen] = useState("login");
+  const [loginData, setLoginData] = useState({ username: "", password: "" });
+  const [loginError, setLoginError] = useState("");
+  const [user, setUser] = useState(null);
+  const [activeDay, setActiveDay] = useState(null);
+  const [activeVideo, setActiveVideo] = useState(null);
+  const [completedExercises, setCompletedExercises] = useState({});
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    const today = new Date().toLocaleDateString("en-US", { weekday: "long" });
+    setActiveDay(today in WORKOUTS ? today : "Monday");
+  }, []);
+
+  const handleLogin = () => {
+    const found = USERS.find(
+      (u) => u.username === loginData.username && u.password === loginData.password
+    );
+    if (found) {
+      setUser(found);
+      setScreen("dashboard");
+      setLoginError("");
+    } else {
+      setLoginError("Invalid username or password.");
+    }
+  };
+
+  const toggleComplete = (day, idx) => {
+    const key = `${day}-${idx}`;
+    setCompletedExercises((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const dayCompletion = (day) => {
+    const exercises = WORKOUTS[day]?.exercises || [];
+    const done = exercises.filter((_, i) => completedExercises[`${day}-${i}`]).length;
+    return { done, total: exercises.length, pct: exercises.length ? Math.round((done / exercises.length) * 100) : 0 };
+  };
+
+  // ── LOGIN SCREEN ──────────────────────────────────────────────
+  if (screen === "login") {
+    return (
+      <div style={styles.loginBg}>
+        <div style={styles.loginCard}>
+          <div style={styles.loginLogo}>
+            <span style={styles.logoIcon}>⚡</span>
+            <span style={styles.logoText}>FitZone</span>
+          </div>
+          <p style={styles.loginTagline}>Your daily gym companion</p>
+          <div style={styles.inputGroup}>
+            <label style={styles.label}>Username</label>
+            <input
+              style={styles.input}
+              placeholder="Enter username"
+              value={loginData.username}
+              onChange={(e) => setLoginData({ ...loginData, username: e.target.value })}
+              onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+            />
+          </div>
+          <div style={styles.inputGroup}>
+            <label style={styles.label}>Password</label>
+            <input
+              style={styles.input}
+              type="password"
+              placeholder="Enter password"
+              value={loginData.password}
+              onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+              onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+            />
+          </div>
+          {loginError && <p style={styles.error}>{loginError}</p>}
+          <button style={styles.loginBtn} onClick={handleLogin}>
+            LOG IN →
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── DASHBOARD ─────────────────────────────────────────────────
+  const workout = WORKOUTS[activeDay];
+  const { done, total, pct } = dayCompletion(activeDay);
+
+  return (
+    <div style={styles.appBg}>
+      {/* Header */}
+      <header style={styles.header}>
+        <button style={styles.menuBtn} onClick={() => setSidebarOpen(!sidebarOpen)}>☰</button>
+        <div style={styles.headerLogo}>⚡ FitZone</div>
+        <div style={styles.headerUser}>
+          <span style={styles.avatar}>{user.name[0]}</span>
+          <button style={styles.logoutBtn} onClick={() => { setScreen("login"); setUser(null); }}>Logout</button>
+        </div>
+      </header>
+
+      <div style={styles.layout}>
+        {/* Sidebar */}
+        <aside style={{ ...styles.sidebar, transform: sidebarOpen ? "translateX(0)" : "translateX(-100%)" }}>
+          <div style={styles.sidebarProfile}>
+            <div style={styles.sidebarAvatar}>{user.name[0]}</div>
+            <div>
+              <div style={styles.sidebarName}>{user.name}</div>
+              <div style={styles.sidebarPlan}>{user.plan} Member</div>
+            </div>
+          </div>
+          <div style={styles.sidebarSection}>Weekly Progress</div>
+          {DAYS.map((day) => {
+            const { pct: p } = dayCompletion(day);
+            return (
+              <div
+                key={day}
+                style={{ ...styles.sidebarDay, background: activeDay === day ? "#1a1a2e" : "transparent" }}
+                onClick={() => { setActiveDay(day); setSidebarOpen(false); }}
+              >
+                <span style={styles.sidebarDayIcon}>{WORKOUTS[day].icon}</span>
+                <div style={{ flex: 1 }}>
+                  <div style={styles.sidebarDayName}>{day}</div>
+                  <div style={styles.sidebarDayLabel}>{WORKOUTS[day].label}</div>
+                </div>
+                <div style={{ ...styles.sidebarPct, color: p === 100 ? "#00e676" : "#888" }}>{p}%</div>
+              </div>
+            );
+          })}
+        </aside>
+
+        {/* Main Content */}
+        <main style={styles.main} onClick={() => sidebarOpen && setSidebarOpen(false)}>
+          {/* Day Tabs */}
+          <div style={styles.dayTabs}>
+            {DAYS.map((day) => (
+              <button
+                key={day}
+                onClick={() => setActiveDay(day)}
+                style={{
+                  ...styles.dayTab,
+                  background: activeDay === day ? workout.color : "#111",
+                  color: activeDay === day ? "#fff" : "#888",
+                  borderColor: activeDay === day ? workout.color : "#222",
+                }}
+              >
+                {day.slice(0, 3)}
+              </button>
+            ))}
+          </div>
+
+          {/* Workout Header */}
+          <div style={{ ...styles.workoutHeader, borderLeft: `5px solid ${workout.color}` }}>
+            <div>
+              <div style={styles.workoutIcon}>{workout.icon}</div>
+              <h2 style={{ ...styles.workoutTitle, color: workout.color }}>{workout.label}</h2>
+              <p style={styles.workoutSubtitle}>{activeDay} • {total} exercises</p>
+            </div>
+            <div style={styles.progressRing}>
+              <svg width="80" height="80" viewBox="0 0 80 80">
+                <circle cx="40" cy="40" r="34" fill="none" stroke="#222" strokeWidth="8" />
+                <circle
+                  cx="40" cy="40" r="34" fill="none"
+                  stroke={workout.color} strokeWidth="8"
+                  strokeDasharray={`${2 * Math.PI * 34}`}
+                  strokeDashoffset={`${2 * Math.PI * 34 * (1 - pct / 100)}`}
+                  strokeLinecap="round"
+                  style={{ transition: "stroke-dashoffset 0.5s ease", transformOrigin: "center", transform: "rotate(-90deg)" }}
+                />
+                <text x="40" y="46" textAnchor="middle" fill="#fff" fontSize="14" fontWeight="700">{pct}%</text>
+              </svg>
+              <div style={styles.progressLabel}>{done}/{total} done</div>
+            </div>
+          </div>
+
+          {/* Exercise List */}
+          <div style={styles.exerciseList}>
+            {workout.exercises.map((ex, i) => {
+              const key = `${activeDay}-${i}`;
+              const done = completedExercises[key];
+              return (
+                <div
+                  key={i}
+                  style={{
+                    ...styles.exerciseCard,
+                    opacity: done ? 0.6 : 1,
+                    borderLeft: `4px solid ${done ? "#00e676" : workout.color}`,
+                  }}
+                >
+                  <div style={styles.exTop}>
+                    <div style={styles.exNumber}>{i + 1}</div>
+                    <div style={styles.exInfo}>
+                      <div style={{ ...styles.exName, textDecoration: done ? "line-through" : "none" }}>{ex.name}</div>
+                      <div style={styles.exMuscle}>{ex.muscle}</div>
+                    </div>
+                    <button
+                      style={{ ...styles.checkBtn, background: done ? "#00e676" : "#222", color: done ? "#000" : "#fff" }}
+                      onClick={() => toggleComplete(activeDay, i)}
+                    >
+                      {done ? "✓" : "○"}
+                    </button>
+                  </div>
+                  <div style={styles.exMeta}>
+                    <span style={styles.metaTag}>🔁 {ex.sets}</span>
+                    <span style={styles.metaTag}>⏱ Rest {ex.rest}</span>
+                    <button
+                      style={{ ...styles.videoBtn, background: workout.color }}
+                      onClick={() => setActiveVideo(ex)}
+                    >
+                      ▶ Watch Demo
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </main>
+      </div>
+
+      {/* Video Modal */}
+      {activeVideo && (
+        <div style={styles.modalOverlay} onClick={() => setActiveVideo(null)}>
+          <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <div style={styles.modalHeader}>
+              <h3 style={styles.modalTitle}>{activeVideo.name}</h3>
+              <button style={styles.modalClose} onClick={() => setActiveVideo(null)}>✕</button>
+            </div>
+            <div style={styles.videoWrapper}>
+              <iframe
+                width="100%"
+                height="315"
+                src={`https://www.youtube.com/embed/${activeVideo.videoId}?autoplay=1`}
+                title={activeVideo.name}
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                style={{ borderRadius: "8px" }}
+              />
+            </div>
+            <div style={styles.modalMeta}>
+              <span style={styles.metaTag}>🎯 {activeVideo.muscle}</span>
+              <span style={styles.metaTag}>🔁 {activeVideo.sets}</span>
+              <span style={styles.metaTag}>⏱ Rest {activeVideo.rest}</span>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── STYLES ────────────────────────────────────────────────────────
+const styles = {
+  loginBg: {
+    minHeight: "100vh",
+    background: "linear-gradient(135deg, #0d0d0d 0%, #1a0a2e 50%, #0d0d0d 100%)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontFamily: "'Segoe UI', sans-serif",
+  },
+  loginCard: {
+    background: "#111",
+    border: "1px solid #222",
+    borderRadius: "16px",
+    padding: "48px 40px",
+    width: "100%",
+    maxWidth: "400px",
+    boxShadow: "0 0 60px rgba(255,77,77,0.15)",
+  },
+  loginLogo: { display: "flex", alignItems: "center", gap: "12px", marginBottom: "8px" },
+  logoIcon: { fontSize: "36px" },
+  logoText: { fontSize: "32px", fontWeight: "900", color: "#FF4D4D", letterSpacing: "-1px" },
+  loginTagline: { color: "#666", marginBottom: "32px", fontSize: "14px" },
+  inputGroup: { marginBottom: "20px" },
+  label: { display: "block", color: "#888", fontSize: "12px", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "1px" },
+  input: {
+    width: "100%", padding: "14px 16px", background: "#1a1a1a",
+    border: "1px solid #333", borderRadius: "8px", color: "#fff",
+    fontSize: "15px", outline: "none", boxSizing: "border-box",
+    transition: "border-color 0.2s",
+  },
+  error: { color: "#FF4D4D", fontSize: "13px", marginBottom: "12px" },
+  loginBtn: {
+    width: "100%", padding: "16px", background: "#FF4D4D",
+    border: "none", borderRadius: "8px", color: "#fff",
+    fontSize: "15px", fontWeight: "800", cursor: "pointer",
+    letterSpacing: "2px", marginBottom: "24px",
+    transition: "transform 0.1s",
+  },
+  demoBox: {
+    background: "#1a1a1a", borderRadius: "8px",
+    padding: "16px", border: "1px dashed #333",
+  },
+  demoTitle: { color: "#666", fontSize: "11px", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "8px" },
+  demoRow: { color: "#aaa", fontSize: "13px", marginBottom: "4px" },
+
+  appBg: { minHeight: "100vh", background: "#0a0a0a", fontFamily: "'Segoe UI', sans-serif", color: "#fff" },
+  header: {
+    display: "flex", alignItems: "center", justifyContent: "space-between",
+    padding: "0 20px", height: "60px",
+    background: "#111", borderBottom: "1px solid #222",
+    position: "sticky", top: 0, zIndex: 100,
+  },
+  menuBtn: { background: "none", border: "none", color: "#fff", fontSize: "22px", cursor: "pointer", padding: "8px" },
+  headerLogo: { fontWeight: "900", fontSize: "20px", color: "#FF4D4D", letterSpacing: "-0.5px" },
+  headerUser: { display: "flex", alignItems: "center", gap: "12px" },
+  avatar: {
+    width: "34px", height: "34px", borderRadius: "50%",
+    background: "#FF4D4D", display: "flex", alignItems: "center", justifyContent: "center",
+    fontWeight: "700", fontSize: "15px",
+  },
+  logoutBtn: {
+    background: "none", border: "1px solid #333", borderRadius: "6px",
+    color: "#888", fontSize: "12px", padding: "6px 12px", cursor: "pointer",
+  },
+  layout: { display: "flex", position: "relative" },
+  sidebar: {
+    position: "fixed", top: "60px", left: 0, bottom: 0,
+    width: "260px", background: "#111", borderRight: "1px solid #222",
+    overflowY: "auto", zIndex: 90, padding: "20px 0",
+    transition: "transform 0.3s ease",
+  },
+  sidebarProfile: {
+    display: "flex", alignItems: "center", gap: "12px",
+    padding: "0 20px 20px", borderBottom: "1px solid #1a1a1a",
+  },
+  sidebarAvatar: {
+    width: "44px", height: "44px", borderRadius: "50%",
+    background: "#FF4D4D", display: "flex", alignItems: "center",
+    justifyContent: "center", fontWeight: "700", fontSize: "18px", flexShrink: 0,
+  },
+  sidebarName: { fontWeight: "700", fontSize: "14px" },
+  sidebarPlan: { color: "#666", fontSize: "12px" },
+  sidebarSection: { color: "#444", fontSize: "11px", textTransform: "uppercase", letterSpacing: "1px", padding: "16px 20px 8px" },
+  sidebarDay: {
+    display: "flex", alignItems: "center", gap: "10px",
+    padding: "12px 20px", cursor: "pointer", borderRadius: "8px", margin: "2px 8px",
+    transition: "background 0.2s",
+  },
+  sidebarDayIcon: { fontSize: "18px" },
+  sidebarDayName: { fontWeight: "600", fontSize: "13px" },
+  sidebarDayLabel: { color: "#666", fontSize: "11px" },
+  sidebarPct: { fontSize: "12px", fontWeight: "700" },
+
+  main: { flex: 1, padding: "20px", maxWidth: "800px", margin: "0 auto", width: "100%" },
+  dayTabs: { display: "flex", gap: "8px", marginBottom: "20px", overflowX: "auto", paddingBottom: "4px" },
+  dayTab: {
+    padding: "8px 16px", border: "1px solid", borderRadius: "20px",
+    fontSize: "13px", fontWeight: "700", cursor: "pointer",
+    transition: "all 0.2s", flexShrink: 0,
+  },
+  workoutHeader: {
+    background: "#111", borderRadius: "12px", padding: "24px",
+    display: "flex", justifyContent: "space-between", alignItems: "center",
+    marginBottom: "20px", border: "1px solid #1a1a1a",
+  },
+  workoutIcon: { fontSize: "32px", marginBottom: "4px" },
+  workoutTitle: { fontSize: "22px", fontWeight: "900", letterSpacing: "-0.5px", margin: "0 0 4px" },
+  workoutSubtitle: { color: "#666", fontSize: "13px", margin: 0 },
+  progressRing: { textAlign: "center" },
+  progressLabel: { color: "#888", fontSize: "11px", marginTop: "4px" },
+
+  exerciseList: { display: "flex", flexDirection: "column", gap: "12px" },
+  exerciseCard: {
+    background: "#111", borderRadius: "12px",
+    padding: "16px 20px", border: "1px solid #1a1a1a",
+    transition: "all 0.2s",
+  },
+  exTop: { display: "flex", alignItems: "center", gap: "14px", marginBottom: "12px" },
+  exNumber: {
+    width: "28px", height: "28px", borderRadius: "50%",
+    background: "#1a1a1a", display: "flex", alignItems: "center",
+    justifyContent: "center", fontSize: "13px", fontWeight: "700", flexShrink: 0, color: "#888",
+  },
+  exInfo: { flex: 1 },
+  exName: { fontWeight: "700", fontSize: "15px", marginBottom: "2px" },
+  exMuscle: { color: "#666", fontSize: "12px" },
+  checkBtn: {
+    width: "36px", height: "36px", borderRadius: "50%",
+    border: "none", fontSize: "16px", cursor: "pointer",
+    fontWeight: "700", transition: "all 0.2s", flexShrink: 0,
+  },
+  exMeta: { display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" },
+  metaTag: {
+    background: "#1a1a1a", borderRadius: "6px",
+    padding: "4px 10px", fontSize: "12px", color: "#888",
+  },
+  videoBtn: {
+    padding: "6px 14px", borderRadius: "6px",
+    border: "none", color: "#fff", fontSize: "12px",
+    fontWeight: "700", cursor: "pointer", marginLeft: "auto",
+  },
+  modalOverlay: {
+    position: "fixed", inset: 0,
+    background: "rgba(0,0,0,0.85)", zIndex: 200,
+    display: "flex", alignItems: "center", justifyContent: "center",
+    padding: "20px",
+  },
+  modal: {
+    background: "#111", borderRadius: "16px",
+    width: "100%", maxWidth: "640px",
+    border: "1px solid #222",
+  },
+  modalHeader: {
+    display: "flex", justifyContent: "space-between", alignItems: "center",
+    padding: "20px 24px 16px",
+  },
+  modalTitle: { fontWeight: "800", fontSize: "18px", margin: 0 },
+  modalClose: {
+    background: "#1a1a1a", border: "none", color: "#fff",
+    width: "32px", height: "32px", borderRadius: "50%",
+    fontSize: "16px", cursor: "pointer",
+  },
+  videoWrapper: { padding: "0 24px" },
+  modalMeta: { display: "flex", gap: "8px", padding: "16px 24px 24px", flexWrap: "wrap" },
+};
